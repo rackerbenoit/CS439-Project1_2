@@ -107,7 +107,6 @@ timer_sleep (int64_t ticks)
    *  Jesse Driving:
    *  Disable interrupts to call sema_down
    */
-  printf("timer ticks %d\n", t->sleep_ticks);
   intr_disable ();
   list_push_back (&sleep_list, &t->sleep_elem);
   intr_enable ();
@@ -214,7 +213,6 @@ thread_checkwake (struct thread *t, struct list_elem *e)
 {
   if (t->sleep_ticks <= timer_ticks ())
   {
-      printf("timer sleep # TWO  %d", timer_ticks());
     sema_up (&(t->sema));
     list_remove (&t->sleep_elem);
   }
