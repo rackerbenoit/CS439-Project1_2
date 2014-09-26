@@ -7,7 +7,8 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
-  
+#include "lib/kernel/list.h"
+
 /* See [8254] for hardware details of the 8254 timer chip. */
 
 #if TIMER_FREQ < 19
@@ -19,22 +20,26 @@
 
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
-
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
 static unsigned loops_per_tick;
+
+static struct list sleep_list;
 
 static intr_handler_func timer_interrupt;
 static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
 static void real_time_delay (int64_t num, int32_t denom);
+void thread_fe_waiting (void);
+void thread_checkwake (struct thread *t, struct list_elem *e);
 
 /* Sets up the timer to interrupt TIMER_FREQ times per second,
    and registers the corresponding interrupt. */
 void
 timer_init (void) 
 {
+  list_init (&sleep_list);
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
 }
@@ -94,12 +99,19 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
-  int64_t start = timer_ticks ();
-
+  struct thread *t = thread_current ();
   ASSERT (intr_get_level () == INTR_ON);
+  t->sleep_ticks = ticks + timer_ticks ();
 
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+  /*
+   *  Jesse Driving:
+   *  Disable interrupts to call sema_down
+   */
+  printf("timer ticks %d\n", t->sleep_ticks);
+  intr_disable ();
+  list_push_back (&sleep_list, &t->sleep_elem);
+  intr_enable ();
+  sema_down (&(t->sema));
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -178,6 +190,34 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
+  thread_fe_waiting ();
+}
+
+void
+thread_fe_waiting ()
+{
+  struct list_elem *e;
+
+  ASSERT (intr_get_level () == INTR_OFF);
+  if(!list_empty(&sleep_list)){
+    for (e = list_begin (&sleep_list); e != list_end (&sleep_list);
+         e = list_next (e))
+      {
+        struct thread *t = list_entry (e, struct thread, sleep_elem);
+        thread_checkwake (t, e);
+      }
+  }
+}
+
+void
+thread_checkwake (struct thread *t, struct list_elem *e)
+{
+  if (t->sleep_ticks <= timer_ticks ())
+  {
+      printf("timer sleep # TWO  %d", timer_ticks());
+    sema_up (&(t->sema));
+    list_remove (&t->sleep_elem);
+  }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
