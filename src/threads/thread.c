@@ -326,8 +326,8 @@ thread_yield (void)
   old_level = intr_disable ();
   if (cur != idle_thread){
     //TODO: list_push_back results in no error, remedy this
-    list_push_back (&ready_list, &cur->elem);
-    // list_insert_ordered(&ready_list, &cur->elem, thread_chk_less, 0);
+    //list_push_back (&ready_list, &cur->elem);
+    list_insert_ordered(&ready_list, &cur->elem, thread_chk_less, 0);
   }
   cur->status = THREAD_READY;
   schedule ();
