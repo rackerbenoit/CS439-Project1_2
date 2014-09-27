@@ -32,7 +32,7 @@ static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
 static void real_time_delay (int64_t num, int32_t denom);
 void thread_fe_waiting (void);
-void thread_checkwake (struct thread *t, struct list_elem *e);
+void thread_checkwake (struct thread *t);
 
 /* Sets up the timer to interrupt TIMER_FREQ times per second,
    and registers the corresponding interrupt. */
@@ -107,10 +107,10 @@ timer_sleep (int64_t ticks)
    *  Jesse Driving:
    *  add to list & lock thread
    */
-  intr_disable ();
-  list_push_back (&sleep_list, &t->sleep_elem);
-  intr_enable ();
-  sema_down (&(t->sema));
+  // intr_disable (); 
+  list_insert_ordered (&sleep_list, &t->sleep_elem, thread_chk_timer, 0);
+  // intr_enable ();
+  sema_down (&t->sema);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -203,18 +203,32 @@ thread_fe_waiting ()
        e = list_next (e))
     {
       struct thread *t = list_entry (e, struct thread, sleep_elem);
-      thread_checkwake (t, e);
+      thread_checkwake (t);
     }
 }
 
 void
-thread_checkwake (struct thread *t, struct list_elem *e)
+thread_checkwake (struct thread *t)
 {
   if (t->sleep_ticks <= timer_ticks ())
   {
     sema_up (&(t->sema));
     list_remove (&t->sleep_elem);
   }
+}
+
+bool 
+thread_chk_timer (const struct list_elem *insert,
+                  const struct list_elem *cmp_to, void *x UNUSED)
+{
+  //Jesse writing these structs
+  struct thread *insert_t = list_entry (insert, struct thread, elem);
+  struct thread *cmp_to_t = list_entry (cmp_to, struct thread, elem);
+
+  if((insert_t->sleep_ticks) < (cmp_to_t->sleep_ticks))
+    return true;
+  else
+    return false;
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

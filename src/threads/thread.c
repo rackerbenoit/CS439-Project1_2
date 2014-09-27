@@ -250,11 +250,11 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
   //TODO: list_push_back results in no error, remedy this
-  list_push_back (&ready_list, &t->elem);
+  // list_push_back (&ready_list, &t->elem);
   /*Adding this function to unblock()
    *Paul is driving
    */
-  // list_insert_ordered(&ready_list, &t->elem, thread_chk_less, 0);
+  list_insert_ordered(&ready_list, &t->elem, thread_chk_less, 0);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -326,7 +326,7 @@ thread_yield (void)
   old_level = intr_disable ();
   if (cur != idle_thread){
     //TODO: list_push_back results in no error, remedy this
-    //list_push_back (&ready_list, &cur->elem);
+    // list_push_back (&ready_list, &cur->elem);
     list_insert_ordered(&ready_list, &cur->elem, thread_chk_less, 0);
   }
   cur->status = THREAD_READY;
@@ -352,8 +352,7 @@ thread_foreach (thread_action_func *func, void *aux)
 }
 
 /* Sets the current thread's priority to NEW_PRIORITY.
- * Jesse drove here
- */
+ * Jesse drove here */
 void
 thread_set_priority (int new_priority) 
 {
@@ -362,25 +361,24 @@ thread_set_priority (int new_priority)
 
   if (old_priority > new_priority)
   {
-    list_insert_ordered (&ready_list, &thread_current ()-> elem,
-                         thread_chk_less, 0);
+    // list_insert_ordered (&ready_list, &thread_current ()->elem,
+    //                      thread_chk_less, 0);
   }
 }
 
 /*
  * Checking to see if the thread we want to insert is less than
  * or equal to thread already on the queue.
- * Paul is driving this method
- */
+ * Paul is driving this method */
 bool 
-thread_chk_less (struct list_elem *insert, 
-                     struct list_elem *cmp_to, void *x)
+thread_chk_less (const struct list_elem *insert, 
+                 const struct list_elem *cmp_to, void *x UNUSED)
 {
   //Jesse writing these structs
   struct thread *insert_t = list_entry (insert, struct thread, elem);
   struct thread *cmp_to_t = list_entry (cmp_to, struct thread, elem);
 
-  if((insert_t -> priority) <= (cmp_to_t -> priority))
+  if((insert_t->priority) > (cmp_to_t->priority))
     return true;
   else
     return false;

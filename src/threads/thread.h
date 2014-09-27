@@ -145,8 +145,8 @@ int thread_get_priority (void);
 void thread_set_priority (int);
 /* Paul driving here
    check if to insert before "compare_to" */
-bool thread_chk_less (struct list_elem *insert, 
-  struct list_elem *cmp_to, void *x);
+bool thread_chk_less (const struct list_elem *insert, 
+                      const struct list_elem *cmp_to, void *x);
 
 int thread_get_nice (void);
 void thread_set_nice (int);
