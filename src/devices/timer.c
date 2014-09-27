@@ -105,7 +105,7 @@ timer_sleep (int64_t ticks)
 
   /*
    *  Jesse Driving:
-   *  Disable interrupts to call sema_down
+   *  add to list & lock thread
    */
   intr_disable ();
   list_push_back (&sleep_list, &t->sleep_elem);
@@ -198,14 +198,13 @@ thread_fe_waiting ()
   struct list_elem *e;
 
   ASSERT (intr_get_level () == INTR_OFF);
-  if(!list_empty(&sleep_list)){
-    for (e = list_begin (&sleep_list); e != list_end (&sleep_list);
-         e = list_next (e))
-      {
-        struct thread *t = list_entry (e, struct thread, sleep_elem);
-        thread_checkwake (t, e);
-      }
-  }
+
+  for (e = list_begin (&sleep_list); e != list_end (&sleep_list);
+       e = list_next (e))
+    {
+      struct thread *t = list_entry (e, struct thread, sleep_elem);
+      thread_checkwake (t, e);
+    }
 }
 
 void

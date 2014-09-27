@@ -127,8 +127,6 @@ void thread_print_stats (void);
 typedef void thread_func (void *aux);
 tid_t thread_create (const char *name, int priority, thread_func *, void *);
 
-static struct list sleep_list;
-
 void thread_block (void);
 void thread_unblock (struct thread *);
 
@@ -145,6 +143,10 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
+/* Paul driving here
+   check if to insert before "compare_to" */
+bool thread_chk_less (struct list_elem *insert, 
+  struct list_elem *cmp_to, void *x);
 
 int thread_get_nice (void);
 void thread_set_nice (int);
