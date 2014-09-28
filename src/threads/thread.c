@@ -95,6 +95,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
+  sema_init (&sema_priority, 0);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -250,7 +251,6 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
   //TODO: list_push_back results in no error, remedy this
-  // list_push_back (&ready_list, &t->elem);
   /*Adding this function to unblock()
    *Paul is driving
    */
@@ -325,8 +325,6 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread){
-    //TODO: list_push_back results in no error, remedy this
-    // list_push_back (&ready_list, &cur->elem);
     list_insert_ordered(&ready_list, &cur->elem, thread_chk_less, 0);
   }
   cur->status = THREAD_READY;
@@ -361,8 +359,7 @@ thread_set_priority (int new_priority)
 
   if (old_priority > new_priority)
   {
-    // list_insert_ordered (&ready_list, &thread_current ()->elem,
-    //                      thread_chk_less, 0);
+    thread_yield ();
   }
 }
 

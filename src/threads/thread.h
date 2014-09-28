@@ -118,6 +118,10 @@ struct thread
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
+/* Jesse drove here:
+ * Semaphore for priority changes */
+struct semaphore sema_priority;
+
 void thread_init (void);
 void thread_start (void);
 
