@@ -95,7 +95,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
-  sema_init (&sema_priority, 0);
+  sema_init (&sema_priority, 0); //Added by Jesse
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -155,7 +155,6 @@ thread_print_stats (void)
    PRIORITY, which executes FUNCTION passing AUX as the argument,
    and adds it to the ready queue.  Returns the thread identifier
    for the new thread, or TID_ERROR if creation fails.
-
    If thread_start() has been called, then the new thread may be
    scheduled before thread_create() returns.  It could even exit
    before thread_create() returns.  Contrariwise, the original
@@ -250,10 +249,8 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  //TODO: list_push_back results in no error, remedy this
-  /*Adding this function to unblock()
-   *Paul is driving
-   */
+  /*Adding this function to unblock() to replace list_push_back
+   *Paul is driving */
   list_insert_ordered(&ready_list, &t->elem, thread_chk_less, 0);
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -325,6 +322,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread){
+    //Jesse driving: Using this function instead of list_push_back
     list_insert_ordered(&ready_list, &cur->elem, thread_chk_less, 0);
   }
   cur->status = THREAD_READY;

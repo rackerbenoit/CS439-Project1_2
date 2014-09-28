@@ -31,7 +31,9 @@ static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
 static void real_time_delay (int64_t num, int32_t denom);
-void thread_fe_waiting (void);
+/* Added this function: John driving here */
+void thread_fe_waiting (void); 
+/* Added this function: John driving here */
 void thread_checkwake (struct thread *t);
 
 /* Sets up the timer to interrupt TIMER_FREQ times per second,
@@ -103,10 +105,8 @@ timer_sleep (int64_t ticks)
   ASSERT (intr_get_level () == INTR_ON);
   t->sleep_ticks = ticks + timer_ticks ();
 
-  /*
-   *  Jesse Driving:
-   *  add to list & lock thread
-   */
+  /* Jesse Driving:
+   *  add to list & lock thread */
   // intr_disable (); 
   list_insert_ordered (&sleep_list, &t->sleep_elem, thread_chk_timer, 0);
   // intr_enable ();
@@ -192,6 +192,8 @@ timer_interrupt (struct intr_frame *args UNUSED)
   thread_fe_waiting ();
 }
 
+/* John driving here
+ * TODO description */
 void
 thread_fe_waiting ()
 {
@@ -207,6 +209,9 @@ thread_fe_waiting ()
     }
 }
 
+/* John driving here
+ * TODO description 
+ * This function will check if the thread should wake up*/
 void
 thread_checkwake (struct thread *t)
 {
@@ -217,6 +222,10 @@ thread_checkwake (struct thread *t)
   }
 }
 
+/*Paul driving here
+ * TODO description
+ * This makes sure that threads are place on the queue in the correct order
+ * based on their priority */
 bool 
 thread_chk_timer (const struct list_elem *insert,
                   const struct list_elem *cmp_to, void *x UNUSED)
