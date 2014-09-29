@@ -460,7 +460,7 @@ list_insert_ordered (struct list *list, struct list_elem *elem,
       break;
   }
   return list_insert (e, elem);
-  sema_up(&sema_priority); //Jesse added this/drove here
+  // sema_up(&sema_priority); //Jesse added this/drove here
 }
 
 /* Iterates through LIST and removes all but the first in each

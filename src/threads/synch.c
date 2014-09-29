@@ -41,6 +41,7 @@
 
    - up or "V": increment the value (and wake up one waiting
      thread, if any). */
+
 void
 sema_init (struct semaphore *sema, unsigned value) 
 {
@@ -68,7 +69,8 @@ sema_down (struct semaphore *sema)
   old_level = intr_disable ();
   while (sema->value == 0) 
     {
-      list_push_back (&sema->waiters, &thread_current ()->elem);
+      list_insert_ordered (&sema->waiters, &thread_current ()->elem, 
+                           thread_chk_less, 0);
       thread_block ();
     }
   sema->value--;

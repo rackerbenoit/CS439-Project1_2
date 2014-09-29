@@ -32,6 +32,9 @@ test_priority_sema (void)
 
   for (i = 0; i < 10; i++) 
     {
+  // intr_disable();
+  // printf("  sema_up  ");
+  // intr_enable();      
       sema_up (&sema);
       msg ("Back in main thread."); 
     }
@@ -40,6 +43,10 @@ test_priority_sema (void)
 static void
 priority_sema_thread (void *aux UNUSED) 
 {
+  // intr_disable();
+  // printf("  STEP 1  ");
+  // intr_enable();
+  
   sema_down (&sema);
   msg ("Thread %s woke up.", thread_name ());
 }
