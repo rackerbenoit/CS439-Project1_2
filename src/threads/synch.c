@@ -121,9 +121,30 @@ sema_up (struct semaphore *sema)
     thread_unblock (t);
   }
   sema->value++;
-  thread_yield();
+  if (!intr_context())
+    thread_yield ();
   intr_set_level (old_level);
 }
+
+// /* A sema_up method to be called from external interrupts 
+//  * This is used for elements */
+// void
+// sema_up_sleeper (struct semaphore *sema) 
+// {
+//   enum intr_level old_level;
+
+//   ASSERT (sema != NULL);
+
+//   old_level = intr_disable ();
+//   if (!list_empty (&sema->waiters)) {
+//     struct thread  *t = list_entry (list_pop_front (&sema->waiters), 
+//                                     struct thread, elem);
+//     thread_unblock (t);
+//   }
+//   sema->value++;
+
+//   intr_set_level (old_level);
+// }
 
 static void sema_test_helper (void *sema_);
 
@@ -300,37 +321,7 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
   
   sema_init (&waiter.semaphore, 0);
-  /* TODO: so yeah, I think here is where we either do priority donation
-   * via giving the lock to the top o' the waiters list (lock->holder = something else;
-   * currently, the locker->holder = thread_current does nothing, but i put it there
-   * because i think we should alter it
-   * RESULTS WHEN TESTING PRIORITY-CONDVAR:
-   * (priority-condvar) Signaling...
-	(priority-condvar) Thread priority 23 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 22 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 21 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 30 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 29 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 28 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 27 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 26 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 25 woke up.
-	(priority-condvar) Signaling...
-	(priority-condvar) Thread priority 24 woke up.
-	(priority-condvar) end
-   * when, as you'd expect, it should be "30, 29, 28..."
-   */
-
-  list_insert_ordered (&cond->waiters, &waiter.elem, thread_chk_less, 0);
-  lock->holder = thread_current ();
+  list_push_back (&cond->waiters, &waiter.elem);
   lock_release (lock);
   sema_down (&waiter.semaphore);
   lock_acquire (lock);

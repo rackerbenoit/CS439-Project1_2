@@ -107,9 +107,7 @@ timer_sleep (int64_t ticks)
 
   /* Jesse Driving:
    *  add to list & lock thread */
-  // intr_disable (); 
   list_insert_ordered (&sleep_list, &t->sleep_elem, thread_chk_timer, 0);
-  // intr_enable ();
   sema_down (&t->sema);
 }
 

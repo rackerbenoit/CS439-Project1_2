@@ -31,6 +31,7 @@ test_priority_donate_one (void)
 
   lock_init (&lock);
   lock_acquire (&lock);
+  //everything after this is going to be the main thread until lock is released (for now, until we done with priority donation)
   thread_create ("acquire1", PRI_DEFAULT + 1, acquire1_thread_func, &lock);
   msg ("This thread should have priority %d.  Actual priority: %d.",
        PRI_DEFAULT + 1, thread_get_priority ());
