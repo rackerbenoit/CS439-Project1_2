@@ -502,7 +502,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
   sema_init (&t->sema, 0);
-  list_push_back (&all_list, &t->allelem);
+  //list_push_back (&all_list, &t->allelem);
+  list_insert_ordered (&all_list, &t->allelem, thread_chk_less, 0);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
@@ -526,8 +527,9 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void) 
 {
-  if (list_empty (&ready_list))
+  if (list_empty (&ready_list)){
     return idle_thread;
+  }
   else
     return list_entry (list_pop_front (&ready_list), struct thread, elem);
 }

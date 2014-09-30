@@ -28,6 +28,9 @@ test_priority_sema (void)
       char name[16];
       snprintf (name, sizeof name, "priority %d", priority);
       thread_create (name, priority, priority_sema_thread, NULL);
+  //             intr_disable();
+  // printf("  Main Priority %d \n", thread_current () -> priority);
+  // intr_enable();
     }
 
   for (i = 0; i < 10; i++) 
