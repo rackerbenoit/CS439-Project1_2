@@ -48,6 +48,7 @@ acquire1_thread_func (void *lock_)
 {
   struct lock *lock = lock_;
   msg("thread1: %d", thread_get_priority());
+
   lock_acquire (lock);
   msg ("acquire1: got the lock");
   lock_release (lock);
