@@ -2,6 +2,8 @@
 #include "../debug.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
+// #include <stdbool.c>
+// #include <stdio.c>
 
 /* Our doubly linked lists have two header elements: the "head"
    just before the first element and the "tail" just after the
@@ -33,8 +35,8 @@
    elements allows us to do a little bit of checking on some
    operations, which can be valuable.) */
 
-static bool is_sorted (struct list_elem *a, struct list_elem *b,
-                       list_less_func *less, void *aux) UNUSED;
+//static bool is_sorted (struct list_elem *a, struct list_elem *b,
+                       // list_less_func *less, void *aux) UNUSED;
 
 /* Returns true if ELEM is a head, false otherwise. */
 static inline bool
@@ -301,9 +303,18 @@ list_size (struct list *list)
 {
   struct list_elem *e;
   size_t cnt = 0;
-
-  for (e = list_begin (list); e != list_end (list); e = list_next (e))
+  struct thread *t;
+  struct thread *t2;
+  for (e = list_begin (list); e != list_end (list); e = list_next (e)){
+    t = list_entry (e, struct thread, elem);
+    t2 = t;
+    // intr_disable();
+    // printf("%d\t", t->priority);
+    // intr_enable();
+    ASSERT(t->priority > 0);
+    //ASSERT(t->priority <= t2->priority);
     cnt++;
+  }
   return cnt;
 }
 
@@ -340,7 +351,7 @@ list_reverse (struct list *list)
 
 /* Returns true only if the list elements A through B (exclusive)
    are in order according to LESS given auxiliary data AUX. */
-static bool
+ bool
 is_sorted (struct list_elem *a, struct list_elem *b,
            list_less_func *less, void *aux)
 {

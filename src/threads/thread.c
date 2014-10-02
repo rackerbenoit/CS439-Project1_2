@@ -209,11 +209,11 @@ thread_create (const char *name, int priority,
   sf->eip = switch_entry;
   sf->ebp = 0;
 
-
   intr_set_level (old_level);
 
   /* Add to run queue. */
   thread_unblock (t);
+  //list_size(&ready_list);
   /* John driving: check to see if new thread has highest priority */
   thread_yield ();
 
@@ -258,6 +258,7 @@ thread_unblock (struct thread *t)
    *Paul is driving */
   list_insert_ordered(&ready_list, &t->elem, thread_chk_less, 0);
   t->status = THREAD_READY;
+
   intr_set_level (old_level);
 }
 
@@ -506,8 +507,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
   sema_init (&t->sema, 0);
-  //list_push_back (&all_list, &t->allelem);
-  list_insert_ordered (&all_list, &t->allelem, thread_chk_less, 0);
+  list_push_back (&all_list, &t->allelem);
+
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
