@@ -93,11 +93,12 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
+    int initial_priority;  //John TODO: need to keep track of initial priority
     struct list_elem allelem;           /* List element for all threads list. */
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
     struct list_elem sleep_elem;        /* Sleep list element */
-
+    struct list lock_list;  //John TODO: keep track of all locks held by thread
     /* From synch.h */
     int64_t sleep_ticks;                /* Sys tick to be stopped at. Paul drove here*/
 

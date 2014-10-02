@@ -259,6 +259,8 @@ lock_release (struct lock *lock)
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);
+  /* TODO: check the lock->sema list of waiters (waiting on said lock)
+     and give the lock to the highest priority on that list */
 }
 
 /* Returns true if the current thread holds LOCK, false
