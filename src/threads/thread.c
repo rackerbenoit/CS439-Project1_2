@@ -503,7 +503,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->initial_priority = priority;
   t->magic = THREAD_MAGIC;
   sema_init (&t->sema, 0);
-  list_init (&t->lock_list);
+  list_init (&t->donor_list);
   list_push_back (&all_list, &t->allelem);
 
 }
@@ -614,6 +614,7 @@ allocate_tid (void)
 
   lock_acquire (&tid_lock);
   tid = next_tid++;
+  //ASSERT (NULL != thread_current ()->donor_list);
   lock_release (&tid_lock);
 
   return tid;
