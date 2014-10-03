@@ -224,7 +224,7 @@ thread_checkwake (struct thread *t)
 /*Paul driving here
  * TODO description
  * This makes sure that threads are place on the queue in the correct order
- * based on their priority */
+ * based on the time left to sleep */
 bool 
 thread_chk_timer (const struct list_elem *insert,
                   const struct list_elem *cmp_to, void *x UNUSED)

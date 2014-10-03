@@ -100,7 +100,8 @@ struct thread
     struct list_elem sleep_elem;        /* Sleep list element */
     struct list_elem lock_elem;         /* List element for ordering lock accesses */
     struct list lock_list;              //John TODO: keep track of all locks held by thread. 
-    struct thread *waiting_on;          //TODO: John: is the thread waiting on another thread??
+    /* John: The lock the thread is waiting on (NULL if not waiting on any lock)*/
+    struct thread *waiting_on;          
     /* From synch.h */
     int64_t sleep_ticks;                /* Sys tick to be stopped at. Paul drove here*/
 
