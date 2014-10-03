@@ -213,7 +213,6 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
-  //list_size(&ready_list);
   /* John driving: check to see if new thread has highest priority */
   thread_yield ();
 
@@ -507,6 +506,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->initial_priority = priority;
   t->magic = THREAD_MAGIC;
   sema_init (&t->sema, 0);
+  list_init (&t->lock_list);
   list_push_back (&all_list, &t->allelem);
 
 }

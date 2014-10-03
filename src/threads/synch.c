@@ -222,20 +222,22 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
-  int holder_pri;
-  int current_pri;
+  struct thread *top_t;
+  /* Always add lock to the thread's lock list */
+  list_insert_ordered (&lock->holder->lock_list,
+                       lock->holder->lock_elem, /* different method */, 0);
 
-  if (lock->holder != NULL){
-    holder_pri = lock->holder->priority;
-    current_pri = thread_current ()->priority;
-    if (current_pri > holder_pri)
-      lock->holder->priority = thread_current ()->priority;
+  if (lock->holder != NULL)
+  {
+    if (current_pri > lock->holder->initial_priority)
+    {
+      t = list_entry (list_pop_front(&lock->holder->lock_list), 
+                      struct thread, lock->holder->lock_elem);
+      lock->holder->priority = t->priority;
+    }
   }
 
-
-
   sema_down (&lock->semaphore);
-
   lock->holder = thread_current ();
 }
 
@@ -270,6 +272,7 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
+                            //= priority of next highest priority
   thread_current ()->priority = thread_current ()->initial_priority;
   lock->holder = NULL;
   sema_up (&lock->semaphore);
