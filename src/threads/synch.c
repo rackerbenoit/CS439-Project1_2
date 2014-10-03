@@ -266,21 +266,23 @@ lock_release (struct lock *lock)
      and give the lock to the highest priority on that list */
 }
 
-bool//OK. Use this to find the maximum priority thread on the list of locks.  Then compare it to the current_thread's priority
-lock_list_less (const struct list_elem *insert, 
-                 const struct list_elem *cmp_to, void *x UNUSED)
-{
-  //Jesse writing these structs
-  struct lock *insert_l = list_entry (insert, struct lock, lock_elem);
-  struct lock *cmp_to_l = list_entry (cmp_to, struct lock, lock_elem);
+// bool//OK. Use this to find the maximum priority thread on the list of locks.  Then compare it to the current_thread's priority
+// lock_list_less (const struct list_elem *insert, 
+//                  const struct list_elem *cmp_to, void *x UNUSED)
+// {
+//   //Jesse writing these structs
+//   struct lock *insert_l = list_entry (insert, struct lock, lock_elem);
+//   struct lock *cmp_to_l = list_entry (cmp_to, struct lock, lock_elem);
 
-  struct thread *max1_t = list_entry (list_max(insert_l->semaphore->waiters, thread_chk_less, 0), struct thread, elem);
-  struct thread *max2_t = list_entry (list_max(cmp_to_l->semaphore->waiters, thread_chk_less, 0), struct thread, elem);
-  if(max1_t->priority > max2_t->priority)
-    return true;
-  else
-    return false;
-}
+//   struct thread *max1_t = list_entry (list_max(&insert_l->semaphore->waiters, 
+//                                       thread_chk_less, 0), struct thread, elem);
+//   struct thread *max2_t = list_entry (list_max(&cmp_to_l->semaphore->waiters, 
+//                                       thread_chk_less, 0), struct thread, elem);
+//   if(max1_t->priority > max2_t->priority)
+//     return true;
+//   else
+//     return false;
+// }
 
 /* Returns true if the current thread holds LOCK, false
    otherwise.  (Note that testing whether some other thread holds
