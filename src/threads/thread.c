@@ -28,9 +28,6 @@ static struct list ready_list;
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
 
-/* TODO: every time this thread aquires a lock, add that lock to the lock_list */
-static struct list lock_list;
-
 /* Idle thread. */
 static struct thread *idle_thread;
 

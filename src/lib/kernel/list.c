@@ -303,21 +303,12 @@ list_size (struct list *list)
 {
   struct list_elem *e;
   size_t cnt = 0;
-  struct thread *t;
-  struct thread *t2;
+
   for (e = list_begin (list); e != list_end (list); e = list_next (e)){
-    t = list_entry (e, struct thread, elem);
-    t2 = t;
-    // intr_disable();
-    // printf("%d\t", t->priority);
-    // intr_enable();
-    // ASSERT(t->priority > 0);
-    //ASSERT(t->priority <= t2->priority);
     cnt++;
   }
   return cnt;
 }
-
 /* Returns true if LIST is empty, false otherwise. */
 bool
 list_empty (struct list *list)

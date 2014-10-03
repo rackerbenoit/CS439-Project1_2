@@ -24,7 +24,7 @@ struct lock
     struct thread *holder;      /* Thread holding lock (for debugging). */
     struct semaphore semaphore; /* Binary semaphore controlling access. */
     //Jesse Driving
-    struct list_elem lock_elem; /* List element for ordering lock accesses */
+    //struct list_elem lock_elem; /* List element for ordering lock accesses */
   };
 
 void lock_init (struct lock *);

@@ -126,26 +126,6 @@ sema_up (struct semaphore *sema)
   intr_set_level (old_level);
 }
 
-// /* A sema_up method to be called from external interrupts 
-//  * This is used for elements */
-// void
-// sema_up_sleeper (struct semaphore *sema) 
-// {
-//   enum intr_level old_level;
-
-//   ASSERT (sema != NULL);
-
-//   old_level = intr_disable ();
-//   if (!list_empty (&sema->waiters)) {
-//     struct thread  *t = list_entry (list_pop_front (&sema->waiters), 
-//                                     struct thread, elem);
-//     thread_unblock (t);
-//   }
-//   sema->value++;
-
-//   intr_set_level (old_level);
-// }
-
 static void sema_test_helper (void *sema_);
 
 /* Self-test for semaphores that makes control "ping-pong"
@@ -222,23 +202,14 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
-  struct thread *top_t;
-  /* Always add lock to the thread's lock list */
-  list_insert_ordered (&lock->holder->lock_list,
-                       lock->holder->lock_elem, /* different method */, 0);
-
   if (lock->holder != NULL)
   {
-    if (current_pri > lock->holder->initial_priority)
-    {
-      t = list_entry (list_pop_front(&lock->holder->lock_list), 
-                      struct thread, lock->holder->lock_elem);
-      lock->holder->priority = t->priority;
-    }
+
   }
 
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
+  list_insert_ordered (lock->holder->lock_list, lock, /* some function */, 0);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -271,9 +242,12 @@ lock_release (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
+  struct thread *t;
 
-                            //= priority of next highest priority
-  thread_current ()->priority = thread_current ()->initial_priority;
+  /* John is driving 
+     Check to see what other priorities are on our thread list.
+     If there are some, accept the higher donation. */
+  
   lock->holder = NULL;
   sema_up (&lock->semaphore);
   /* TODO: check the lock->sema list of waiters (waiting on said lock)

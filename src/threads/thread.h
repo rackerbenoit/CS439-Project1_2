@@ -98,6 +98,7 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
     struct list_elem sleep_elem;        /* Sleep list element */
+    struct list_elem lock_elem;         /* List element for ordering lock accesses */
     struct list lock_list;  //John TODO: keep track of all locks held by thread
     /* From synch.h */
     int64_t sleep_ticks;                /* Sys tick to be stopped at. Paul drove here*/
