@@ -33,7 +33,7 @@ test_priority_donate_one (void)
   lock_acquire (&lock);
   //everything after this is going to be the main thread until lock is released (for now, until we done with priority donation)
   thread_create ("acquire1", PRI_DEFAULT + 1, acquire1_thread_func, &lock);
-  msg ("Main thread should have priority %d.  Actual priority: %d.",
+  msg ("This thread should have priority %d.  Actual priority: %d.",
        PRI_DEFAULT + 1, thread_get_priority ());
   thread_create ("acquire2", PRI_DEFAULT + 2, acquire2_thread_func, &lock);
   msg ("This thread should have priority %d.  Actual priority: %d.",
@@ -47,8 +47,6 @@ static void
 acquire1_thread_func (void *lock_) 
 {
   struct lock *lock = lock_;
-  msg("thread1: %d", thread_get_priority());
-
   lock_acquire (lock);
   msg ("acquire1: got the lock");
   lock_release (lock);
@@ -58,9 +56,7 @@ acquire1_thread_func (void *lock_)
 static void
 acquire2_thread_func (void *lock_) 
 {
-  msg("thread2: %d", thread_get_priority());
   struct lock *lock = lock_;
-
   lock_acquire (lock);
   msg ("acquire2: got the lock");
   lock_release (lock);

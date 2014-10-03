@@ -360,7 +360,6 @@ thread_set_priority (int new_priority)
 {
   int old_priority = thread_current ()->priority;
   thread_current ()->priority = new_priority;
-  // struct thread *t = list_entry (list_head (&ready_list), struct thread, elem);
   if (old_priority > new_priority)
     thread_yield ();
 }
@@ -505,6 +504,7 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+  t->initial_priority = priority;
   t->magic = THREAD_MAGIC;
   sema_init (&t->sema, 0);
   list_push_back (&all_list, &t->allelem);

@@ -311,7 +311,7 @@ list_size (struct list *list)
     // intr_disable();
     // printf("%d\t", t->priority);
     // intr_enable();
-    ASSERT(t->priority > 0);
+    // ASSERT(t->priority > 0);
     //ASSERT(t->priority <= t2->priority);
     cnt++;
   }
