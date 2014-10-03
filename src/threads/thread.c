@@ -250,8 +250,8 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  /*Adding this function to unblock() to replace list_push_back
-   *Paul is driving */
+  /* Adding this function to unblock() to replace list_push_back
+   * Paul is driving */
   list_insert_ordered(&ready_list, &t->elem, thread_chk_less, 0);
   t->status = THREAD_READY;
 

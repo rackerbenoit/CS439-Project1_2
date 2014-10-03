@@ -191,7 +191,8 @@ timer_interrupt (struct intr_frame *args UNUSED)
 }
 
 /* John driving here
- * TODO description */
+ * TODO description
+ * Correctly add threads to the list by calling the appropriate functions */
 void
 thread_fe_waiting ()
 {
