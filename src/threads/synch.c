@@ -201,15 +201,24 @@ lock_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
-
-  if (lock->holder != NULL)
-  {
-
-  }
-
+  // if (lock->holder != NULL)//We need to do something like this.  The problem is that the new thread hasn't been added to the list yet.
+  // {
+  //   if(lock->holder->priority < thread_get_priority ())
+  //   {
+  //     thread_set_priority(list_entry(list_max(&lock->holder->lock_list, lock_list_less, 0), struct thread, elem)->priority);
+  //   }
+  //   else{
+  //     //current thread is waiting on the holder
+  //     sema_down(&lock->semaphore);
+  //     //set waiting on to null
+  //   }
+  // }  
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
-  list_insert_ordered (lock->holder->lock_list, lock, /* some function */, 0);
+  //list_insert (&lock->holder->lock_list, lock->holder->lock_elem);//John: Add to lock_list
+  //check the 
+  //if(list_max(lock->holder->lock_list, lock_list_less, 0)->priority, thread_get_priority ())
+  //  thread_set_priority(list_max(lock->holder->lock_list, lock_list_less, 0)->priority);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -244,14 +253,33 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
   struct thread *t;
 
-  /* John is driving 
-     Check to see what other priorities are on our thread list.
-     If there are some, accept the higher donation. */
-  
+  //list_remove(&lock);//take lock off of current thread's lock_list
   lock->holder = NULL;
   sema_up (&lock->semaphore);
+  //if there are more locks, check those priorities
+  //if(!list_empty(thread_current ()->lock_list))
+  //  thread_set_priority(list_max(lock->holder->lock_list, lock_list_less, 0)->priority);
+  //else{//set to original priority
+  //  thread_set_priority(thread_current ()->initial_priority);
+  //}
   /* TODO: check the lock->sema list of waiters (waiting on said lock)
      and give the lock to the highest priority on that list */
+}
+
+bool//OK. Use this to find the maximum priority thread on the list of locks.  Then compare it to the current_thread's priority
+lock_list_less (const struct list_elem *insert, 
+                 const struct list_elem *cmp_to, void *x UNUSED)
+{
+  //Jesse writing these structs
+  struct lock *insert_l = list_entry (insert, struct lock, lock_elem);
+  struct lock *cmp_to_l = list_entry (cmp_to, struct lock, lock_elem);
+
+  struct thread *max1_t = list_entry (list_max(insert_l->semaphore->waiters, thread_chk_less, 0), struct thread, elem);
+  struct thread *max2_t = list_entry (list_max(cmp_to_l->semaphore->waiters, thread_chk_less, 0), struct thread, elem);
+  if(max1_t->priority > max2_t->priority)
+    return true;
+  else
+    return false;
 }
 
 /* Returns true if the current thread holds LOCK, false

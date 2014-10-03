@@ -17,14 +17,15 @@ void sema_down (struct semaphore *);
 bool sema_try_down (struct semaphore *);
 void sema_up (struct semaphore *);
 void sema_self_test (void);
-
+bool lock_list_less (const struct list_elem *insert, 
+                 const struct list_elem *cmp_to, void *x);
 /* Lock. */
 struct lock 
   {
     struct thread *holder;      /* Thread holding lock (for debugging). */
     struct semaphore semaphore; /* Binary semaphore controlling access. */
     //Jesse Driving
-    //struct list_elem lock_elem; /* List element for ordering lock accesses */
+    struct list_elem lock_elem; /* List element for ordering lock accesses */
   };
 
 void lock_init (struct lock *);
