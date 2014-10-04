@@ -35,7 +35,8 @@
 
 int find_max_priority (struct list *lock_list);
 void release_thread (struct list *donors, struct lock *lock);
-struct list_elem *get_thread_holding_lock (struct list *donors, struct lock *lock);
+struct thread *get_thread_holding_lock (struct list *donors, struct lock *lock);
+void pass_priority (struct thread *lock_holder, struct thread *doner);
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
@@ -213,16 +214,35 @@ lock_acquire (struct lock *lock)
   struct thread *t;
   if (lock->holder != NULL)
   {
+    /* Is it possible to donate? */
+    /* If the lock holder's initial priority is less than current, then check donor list */
     if (lock->holder->initial_priority < thread_current ()->priority)
     { 
-      //t = list_entry(get_thread_holding_lock(lock), struct thread, donor_elem);     
-      // lock->holder->donor_list
-      lock->holder->priority = thread_current ()->priority;
-      list_push_back(&lock->holder->donor_list, &thread_current ()->donor_elem);
-      thread_current ()->waiting_on = lock;
+      /* Has a thread waiting on this lock already donated? */
+      t = get_thread_holding_lock(&lock->holder->donor_list, lock);
+      if (t != NULL)
+      {
+        /* Insert the larger of the two waiting on the lock into the list */
+        if (t->priority < thread_current ()->priority)
+        {
+          list_insert_ordered (&lock->holder->donor_list, 
+              &thread_current ()->donor_elem, thread_chk_less, 0);
+          list_remove (&t->donor_elem);
+        }
+      }
+      else
+      {      
+        list_insert_ordered(&lock->holder->donor_list, 
+            &thread_current ()->donor_elem, thread_chk_less, 0);
+      }
+      /* If the lock holder's priority is less than the current, then donate 
+       * here, pass on this priority to all others */
+      pass_priority (lock->holder, thread_current ());
     }
   }
+  thread_current ()->waiting_on = lock;
   sema_down (&lock->semaphore);
+  thread_current ()->waiting_on = NULL;
   lock->holder = thread_current ();
 }
 
@@ -244,6 +264,15 @@ lock_try_acquire (struct lock *lock)
   if (success)
     lock->holder = thread_current ();
   return success;
+}
+
+void
+pass_priority (struct thread *lock_holder, struct thread *doner)
+{
+  if (lock_holder->priority < doner->priority)
+    lock_holder->priority = doner->priority;
+  if (lock_holder->waiting_on != NULL)
+    pass_priority (lock_holder->waiting_on->holder, lock_holder);
 }
 
 /* Releases LOCK, which must be owned by the current thread.
@@ -306,7 +335,7 @@ release_thread (struct list *donors, struct lock *lock)
   }
 }
 
-struct list_elem*
+struct thread*
 get_thread_holding_lock (struct list *donors, struct lock *lock)
 {
   struct list_elem *e;
@@ -316,8 +345,9 @@ get_thread_holding_lock (struct list *donors, struct lock *lock)
   {
     t = list_entry (e, struct thread, donor_elem);
     if (t->waiting_on == lock)
-      return e;      
+      return t;      
   }
+  return NULL;
 }
 
 int

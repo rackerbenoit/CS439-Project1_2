@@ -614,7 +614,6 @@ allocate_tid (void)
 
   lock_acquire (&tid_lock);
   tid = next_tid++;
-  //ASSERT (NULL != thread_current ()->donor_list);
   lock_release (&tid_lock);
 
   return tid;
